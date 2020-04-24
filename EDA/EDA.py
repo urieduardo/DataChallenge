@@ -79,6 +79,7 @@ def joinColumns2(df1, df2):
     for col in df2.columns:
         if col != "COD_CLIENTE":
             dfz[col] = np.nan
+
     df = pd.concat([dfx, dfy, dfz]).sort_values("MES_DATA", ascending = False)    
     df = df.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
     df = df.drop("MES_COTIZACION_y", axis = 1)
@@ -88,5 +89,17 @@ def joinColumns2(df1, df2):
 
 train = joinColumns2(train, base_3)
 
+# CODIGO JULIO
+
 train = joinColumns(train, base_4)
+
+# CODIGO URI
+
 train = joinColumns(train, base_5)
+
+# AQUÍ CÓDIGO QUIQUE
+
+a = train.corr()
+for col in a.columns:
+    if abs(a[col]) >= 0.9:
+        
