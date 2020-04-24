@@ -18,9 +18,9 @@ dateparse = lambda x: pd.to_datetime(x)
 # Carga datos
 base_1 = pd.read_csv(r"./data/Base1_train.csv", parse_dates = ["MES_COTIZACION"], date_parser = dateparse) # Base cotizaciones
 base_2 = pd.read_csv(r"./data/Base2.csv", sep = ";", parse_dates = ["MES_COTIZACION"], date_parser = dateparse) # Información sociodemográfica + digital
-base_3 = pd.read_csv(r"./data/Base3.csv", sep = ";", parse_dates = ["MES_COTIZACION"], date_parser = dateparse) # Base productos BBVA
-base_4 = pd.read_csv(r"./data/Base4.csv", sep = ";", parse_dates = ["MES_COTIZACION"], date_parser = dateparse) # Base de saldos en el Sistema Financiero
-base_5 = pd.read_csv(r"./data/Base5.csv", sep = ";", parse_dates = ["MES_COTIZACION"], date_parser = dateparse) # Base de consumos con tarjeta
+base_3 = pd.read_csv(r"./data/Base3.csv", sep = ";", parse_dates = ["MES_COTIZACION", "MES_DATA"], date_parser = dateparse) # Base productos BBVA
+base_4 = pd.read_csv(r"./data/Base4.csv", sep = ";", parse_dates = ["MES_COTIZACION", "MES_DATA"], date_parser = dateparse) # Base de saldos en el Sistema Financiero
+base_5 = pd.read_csv(r"./data/Base5.csv", sep = ";", parse_dates = ["MES_COTIZACION", "MES_DATA"]], date_parser = dateparse) # Base de consumos con tarjeta
 
 # Exploratory Data Analysis
 ## Base_1
@@ -60,9 +60,27 @@ base_5.COD_CLIENTE.isnull().sum()
 def joinColumns(df1, df2):
     df = df1.merge(df2, on = "COD_CLIENTE", how = "left")
     df = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"] ,:]
+    df = df.sort_values("MES_COTIZACION_y", ascending = False)
+    df = df.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
+    df = df.drop("MES_COTIZACION_y", axis = 1)
+    df = df.rename(columns = {"MES_COTIZACION_x": "MES_COTIZACION"})
     return df
 
 train = joinColumns(base_1, base_2)
-train = train.sort_values("MES_COTIZACION_y", ascending = False)
-train = train.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
+
+def joinColumns2(df1, df2):
+    df = df1.merge(df2, on = "COD_CLIENTE", how = "left")
+    df = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"] ,:]
+    print(df.shape[0])
+    df = df.sort_values("MES_DATA", ascending = False)
+    df = df.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
+    df = df.drop("MES_COTIZACION_y", axis = 1)
+    df = df.rename(columns = {"MES_COTIZACION_x": "MES_COTIZACION"})
+    return df
+
+train = joinColumns2(train, base_3)
+
+train = joinColumns(train, base_4)
+train = joinColumns(train, base_5)
+
 
