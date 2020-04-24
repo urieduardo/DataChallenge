@@ -70,14 +70,20 @@ def joinColumns(df1, df2):
 train = joinColumns(base_1, base_2)
 
 def joinColumns2(df1, df2):
-    df = df1.merge(df2, on = "COD_CLIENTE", how = "inner")
-    dfx = df1.merge(df2, on = "COD_CLIENTE", how="outer", indicator=True)
-    dfx = dfx[dfx['_merge'] == 'left_only']
-    df = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
-    df = pd.concat([df,dfx]).sort_values("MES_DATA", ascending = False)    
+
+    df = df1.merge(df2, on = "COD_CLIENTE", how = "left", indicator = True)
+    
+    dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
+    dfy = df[df['_merge'] == 'left_only']
+    dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], :]
+    for col in df2.columns:
+        if col != "COD_CLIENTE":
+            dfz[col] = np.nan
+    df = pd.concat([dfx, dfy, dfz]).sort_values("MES_DATA", ascending = False)    
     df = df.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
     df = df.drop("MES_COTIZACION_y", axis = 1)
     df = df.rename(columns = {"MES_COTIZACION_x": "MES_COTIZACION"})
+
     return df
 
 train = joinColumns2(train, base_3)
