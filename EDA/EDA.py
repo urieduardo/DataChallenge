@@ -95,30 +95,25 @@ train = joinColumns2(train, base_3)
 # CODIGO JULIO
 
 def joinColumns3(df1, df2):
-    
+
     df = df1.merge(df2, on = "COD_CLIENTE", how = "left", indicator = True)
     dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
     dfy = df.loc[df['_merge'] == 'left_only', :]
     dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], df.columns[:len(df1.columns)]]
     df = pd.concat([dfx, dfy, dfz], sort = False).drop("_merge", axis = 1)
-    a = df.copy()
-    # print(len(df.columns[:len(df1.columns)])
-    # df_gr_c = df.groupby(df.columns[:len(df1.columns)].to_list(), as_index = False).agg({"MES_DATA_y" :"count"})
-    df_gr_m = df.groupby(df.columns[:len(df1.columns)].to_list(), as_index = False).mean()
-    b = df_gr_m.copy()
-    return a, b
+
+    df.columns = df1.columns.to_list() + df.columns[len(df1.columns):].to_list()
+
+    df_gr_m = df.groupby(df1.columns.to_list(), as_index = False).mean()
+
+    df1 = df1.merge(df_gr_m, on = df1.columns.to_list(), how = "left")
     
+    return df1
+
     # df = df.drop(["MES_COTIZACION_y", "MES_DATA_y"], axis = 1)
     # df = df.rename(columns = {"MES_COTIZACION_x" : "MES_COTIZACION", "MES_DATA_x" : "MES_DATA"})
 
-    # return train
-
-a, b  = joinColumns3(train, base_4)
-
-
-df = df.sort_values(by = ["COD_CLIENTE", "MES_COTIZACION_y", "MES_DATA_y"],  ascending = [0, 0, 0]).drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
-
-train = joinColumns(train, base_4)
+train  = joinColumns3(train, base_4)
 
 # CODIGO URI
 
