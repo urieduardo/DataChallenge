@@ -26,6 +26,10 @@ base_3 = pd.read_csv(r"./data/Base3.csv", sep = ";", parse_dates = ["MES_COTIZAC
 base_4 = pd.read_csv(r"./data/Base4.csv", sep = ";", parse_dates = ["MES_COTIZACION", "MES_DATA"], date_parser = dateparse) # Base de saldos en el Sistema Financiero
 base_5 = pd.read_csv(r"./data/Base5.csv", sep = ";", parse_dates = ["MES_COTIZACION", "MES_DATA"], date_parser = dateparse) # Base de consumos con tarjeta
 
+# casting de predictores categóricos
+base_4["ST_CREDITO"] = base_4["ST_CREDITO"].astype("category")
+base_5[["CD_DIVISA", "TP_TARJETA"]] = base_5[["CD_DIVISA", "TP_TARJETA"]].astype("category")
+
 # Exploratory Data Analysis
 ## Base_1
 
@@ -103,6 +107,15 @@ def joinColumns3(df1, df2):
     df = pd.concat([dfx, dfy, dfz], sort = False).drop("_merge", axis = 1)
 
     df.columns = df1.columns.to_list() + df.columns[len(df1.columns):].to_list()
+    
+    # separación entre predictores numéricos y categóricos
+    nume = df2.columns[df2.dtypes == "int64"]
+    cate = df.columns[df2.dtypes == "category"]
+    df_num = df[df.columns.difference(cate)]
+    df_cate = df[df.columns.difference(nume)]
+    
+    df_gr_m_num = df_num.groupby(df1.columns.to_list(), as_index = False).mean()
+    df_gr_m_cate = df_cate.groupby(df1.columns.to_list(), as_index = False).count()
 
     df_gr_m = df.groupby(df1.columns.to_list(), as_index = False).mean()
 
