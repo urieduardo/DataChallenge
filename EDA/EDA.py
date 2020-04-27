@@ -82,7 +82,7 @@ def joinColumns2(df1, df2):
     df = df1.merge(df2, on = "COD_CLIENTE", how = "left", indicator = True)
     dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
     dfy = df.loc[df['_merge'] == 'left_only', :]
-    dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], df.columns[:len(df1.columns)]]
+    dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], df.columns[:len(df1.columns)]]   
     # print(dfx.dtypes)
     # print(dfy.dtypes)
     # print(dfz.dtypes)
