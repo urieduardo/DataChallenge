@@ -13,6 +13,7 @@ import sys
 import seaborn as sns
 from sklearn.preprocessing import LabelEncoder
 from sklearn.feature_selection import chi2
+from sklearn.impute import SimpleImputer
 
 test = pd.read_csv(r"./data/Base1_test.csv")
 
@@ -93,11 +94,53 @@ train = joinColumns2(train, base_3)
 
 # CODIGO JULIO
 
-# train = joinColumns(train, base_4)
+def joinColumns3(df1, df2):
+    
+    df = df1.merge(df2, on = "COD_CLIENTE", how = "left", indicator = True)
+    dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
+    dfy = df.loc[df['_merge'] == 'left_only', :]
+    dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], df.columns[:len(df1.columns)]]
+    df = pd.concat([dfx, dfy, dfz], sort = False).drop("_merge", axis = 1)
+    a = df.copy()
+    # print(len(df.columns[:len(df1.columns)])
+    # df_gr_c = df.groupby(df.columns[:len(df1.columns)].to_list(), as_index = False).agg({"MES_DATA_y" :"count"})
+    df_gr_m = df.groupby(df.columns[:len(df1.columns)].to_list(), as_index = False).mean()
+    b = df_gr_m.copy()
+    return a, b
+    
+    # df = df.drop(["MES_COTIZACION_y", "MES_DATA_y"], axis = 1)
+    # df = df.rename(columns = {"MES_COTIZACION_x" : "MES_COTIZACION", "MES_DATA_x" : "MES_DATA"})
+
+    # return train
+
+a, b  = joinColumns3(train, base_4)
+
+
+df = df.sort_values(by = ["COD_CLIENTE", "MES_COTIZACION_y", "MES_DATA_y"],  ascending = [0, 0, 0]).drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
+
+train = joinColumns(train, base_4)
 
 # CODIGO URI
 
-# train = joinColumns(train, base_5)
+def joinColumns3(df1, df2):
+
+   df = df1.merge(df2, on = "COD_CLIENTE", how = "left", indicator = True)
+   
+   dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
+   dfy = df[df['_merge'] == 'left_only']
+   dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], :]
+   for col in df2.columns:
+       if col != "COD_CLIENTE":
+           dfz[col] = np.nan
+
+   df = pd.concat([dfx, dfy, dfz]).sort_values("MES_DATA", ascending = False)  
+   df = df.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
+   df = df.drop(["MES_COTIZACION_y", "MES_DATA_y", "_merge"], axis = 1)
+   df = df.rename(columns = {"MES_COTIZACION_x": "MES_COTIZACION", "MES_DATA_x" : "MES_DATA"})
+
+   return df
+
+train = joinColumns(train, base_5)
 
 # AQUÍ CÓDIGO QUIQUE
 
@@ -123,6 +166,7 @@ cat_cols = train.dtypes[train.dtypes == "O"].index[2:].to_list()
 # Análisis Columnas numéricas
 
 # Eliminando una de cada dos columnas numéricas correlacionadas
+# (Para facilitar análisis)
 
 corrmat = train[numeric_cols].corr()
 droped_corr_cols = []
@@ -157,6 +201,9 @@ for col in cat_cols:
     #     "\nMissing Values %: " + str(round(train.isnull().sum()[col]/len(train),4))
     # plt.figtext(1, 0.5, s)
     plt.show()
+
+imp = SimpleImputer(strategy="most_frequent")
+imp.fit_transform(df)
 
 # Chi Cuadrada
 
