@@ -7,9 +7,12 @@ Created on Thu Apr 23 15:57:38 2020
 
 import pandas as pd
 import numpy as np
+import matplotlib.pyplot as plt
 import os 
 import sys
 import seaborn as sns
+from sklearn.preprocessing import LabelEncoder
+from sklearn.feature_selection import chi2
 
 test = pd.read_csv(r"./data/Base1_test.csv")
 
@@ -72,15 +75,14 @@ train = joinColumns(base_1, base_2)
 def joinColumns2(df1, df2):
 
     df = df1.merge(df2, on = "COD_CLIENTE", how = "left", indicator = True)
-    
     dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
-    dfy = df[df['_merge'] == 'left_only']
-    dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], :]
-    for col in df2.columns:
-        if col != "COD_CLIENTE":
-            dfz[col] = np.nan
-
-    df = pd.concat([dfx, dfy, dfz]).sort_values("MES_DATA", ascending = False)    
+    dfy = df.loc[df['_merge'] == 'left_only', :]
+    dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], df.columns[:len(df1.columns)]]
+    # print(dfx.dtypes)
+    # print(dfy.dtypes)
+    # print(dfz.dtypes)
+    df = pd.concat([dfx, dfy, dfz], sort = False).drop("_merge", axis = 1)
+    df = df.sort_values("MES_DATA", ascending = False)    
     df = df.drop_duplicates(["COD_CLIENTE", "COD_SOL"], keep = "first")
     df = df.drop("MES_COTIZACION_y", axis = 1)
     df = df.rename(columns = {"MES_COTIZACION_x": "MES_COTIZACION"})
@@ -91,15 +93,85 @@ train = joinColumns2(train, base_3)
 
 # CODIGO JULIO
 
-train = joinColumns(train, base_4)
+# train = joinColumns(train, base_4)
 
 # CODIGO URI
 
-train = joinColumns(train, base_5)
+# train = joinColumns(train, base_5)
 
 # AQUÍ CÓDIGO QUIQUE
 
-a = train.corr()
-for col in a.columns:
-    if abs(a[col]) >= 0.9:
-        
+# Dividiendo columnas por tipo
+bool_cols = [
+"FLG_DESEMBOLSO",
+"USO_BI_M0",
+"USO_BI_M1",
+"USO_BI_M2",
+"USO_BM_M0",
+"USO_BM_M1",
+"USO_BM_M2"
+]
+
+# for col in bool_cols:
+#     train[col] = train[col].astype(bool)
+
+numeric_cols = train.dtypes[train.dtypes == np.float64].index.to_list() +\
+    train.dtypes[train.dtypes == np.int64].index.to_list()
+
+cat_cols = train.dtypes[train.dtypes == "O"].index[2:].to_list()
+
+# Análisis Columnas numéricas
+
+# Eliminando una de cada dos columnas numéricas correlacionadas
+
+corrmat = train[numeric_cols].corr()
+droped_corr_cols = []
+
+for col in corrmat.columns:
+    if col not in droped_corr_cols:
+        for colname in a.index:
+            if colname in droped_corr_cols:
+                pass
+            else:
+                print(colname + " se correlaciona mucho con " + col +
+                      " por lo tanto nos deshacemos de ella por aportar\n la misma información")
+                droped_corr_cols.append(colname)
+                corrmat = corrmat.drop(colname, axis = 1)
+
+# Graficando histogramas de columnas numéricas
+
+for col in numeric_cols:
+    train[col].plot.hist(title = col)
+    s = train.describe()[col].to_string() + \
+        "\nMissing Values: " + str(train.isnull().sum()[col]) + \
+        "\nMissing Values %: " + str(round(train.isnull().sum()[col]/len(train),4))
+    plt.figtext(1, 0.5, s)
+    plt.show()
+
+## Análisis Columnas categóricas
+
+for col in cat_cols:
+    train[col].value_counts().plot.bar(title = col, rot = 0)
+    # s = train.describe()[col].to_string() + \
+    #     "\nMissing Values: " + str(train.isnull().sum()[col]) + \
+    #     "\nMissing Values %: " + str(round(train.isnull().sum()[col]/len(train),4))
+    # plt.figtext(1, 0.5, s)
+    plt.show()
+
+# Chi Cuadrada
+
+for col in cat_cols:
+    label_encoder = LabelEncoder()
+    train[col] = label_encoder.fit_transform(train[col])
+
+label = 'FLG_DESEMBOLSO'
+
+X = train[cat_cols + bool_cols].drop(label,axis=1)
+y = train[label]
+
+chi_scores = chi2(X,y)
+
+p_values = pd.Series(chi_scores[1],index = X.columns)
+p_values.sort_values(ascending = False , inplace = True)
+
+p_values.plot.bar()

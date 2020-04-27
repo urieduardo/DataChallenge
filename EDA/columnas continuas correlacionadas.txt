@@ -1,0 +1,24 @@
+RNG_MARGEN_AHORRO se correlaciona mucho con RNG_SMED_AHORRO por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_CTE se correlaciona mucho con RNG_SMED_CTE por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_SMED_FFMM se correlaciona mucho con RNG_SMED_CTE por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_FFMM se correlaciona mucho con RNG_SMED_CTE por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_PLAZO se correlaciona mucho con RNG_SMED_PLAZO por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_SMED_CTS se correlaciona mucho con RNG_SMED_PLAZO por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_CTS se correlaciona mucho con RNG_SMED_PLAZO por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_PLD se correlaciona mucho con RNG_SMED_PLD por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_SMED_HIP se correlaciona mucho con RNG_SMED_VEH por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_HIP se correlaciona mucho con RNG_SMED_VEH por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_SMED_TC se correlaciona mucho con RNG_SMED_VEH por lo tanto nos deshacemos de ella por aportar
+ la misma información
+RNG_MARGEN_TC se correlaciona mucho con RNG_SMED_VEH por lo tanto nos deshacemos de ella por aportar
+ la misma información
