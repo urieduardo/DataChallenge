@@ -104,7 +104,7 @@ def joinColumns3(df1, df2):
     dfx = df.loc[df["MES_COTIZACION_y"] <= df["MES_COTIZACION_x"], :]
     dfy = df.loc[df['_merge'] == 'left_only', :]
     dfz = df.loc[df["MES_COTIZACION_y"] > df["MES_COTIZACION_x"], df.columns[:len(df1.columns)]]
-    df = pd.concat([dfx, dfy, dfz], sort = False).drop("_merge", axis = 1)
+    df = pd.concat([dfx, dfy, dfz], sort = False).drop("_merge", axis = 1)   
 
     df.columns = df1.columns.to_list() + df.columns[len(df1.columns):].to_list()
     
